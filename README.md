@@ -12,3 +12,7 @@ Code for my Cambridge Part III Essay, about Deep Reinforcement Learning.
   - Try to find good examples of Q-Learning implementation
   
 First goal : get a first draft of functional code, which would be improved "iteratively".
+
+### Code examples 
+An implementation of DQN using OpenAI gym, tensorflow w/ multilayer perceptron :
+https://github.com/stormmax/reinforcement_learning

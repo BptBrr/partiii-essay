@@ -16,3 +16,7 @@ First goal : get a first draft of functional code, which would be improved "iter
 ### Code examples 
 An implementation of DQN using OpenAI gym, tensorflow w/ multilayer perceptron :
 https://github.com/stormmax/reinforcement_learning
+
+### 7.02 Update
+
+Code for q_network and cartpole implementation. Problem : the system is apparently not learning.

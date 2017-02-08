@@ -46,7 +46,7 @@ class Agent():
         action_mask = tf.one_hot(self.action, self.action_size)
         q_predict = tf.reduce_sum(np.dot(self.q_values, action_mask), 1)
 
-        self.loss = tf.reduce_mean(tf.square(tf.sub(self.target_q, q_predict)))
+        self.loss = tf.reduce_mean(tf.square(self.target_q - q_predict))
         self.optimizer = tf.train.AdamOptimizer(self.rate)
         self.train_op = self.optimizer.minimize(self.loss)
 
@@ -85,9 +85,8 @@ class Agent():
                 q_values = self.sess.run(self.q_values, feed_dict={self.state_input: [s[2] for s in samples]})
                 max_q_values = q_values.max(axis = 1)
 
-                # We calculate the target, r + gamma * max Q(s,a)
-                target_q = np.array([samples[i][3] + self.gamma * max_q_values[i] for i in range(len(samples))])
-                target_q = target_q.reshape([self.batch_size])
+                # We calculate the target, r + gamma * max Q(s,a) if not done, r else.
+                target_q = [samples[i][3] + self.gamma * max_q_values[i] * (1 - samples[i][4]) for i in range(len(samples))]
 
                 l, a = self.sess.run([self.loss, self.train_op], feed_dict={
                                                                 # Initial states stored in s[0]
@@ -97,5 +96,5 @@ class Agent():
                                                                 self.action: [s[1] for s in samples]
                                                                 })
 
-                if self.steps % 1000 == 0:
-                    print l
+                if self.steps % 100 == 0:
+                    print "Current loss :", l

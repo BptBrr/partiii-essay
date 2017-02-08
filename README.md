@@ -20,3 +20,7 @@ https://github.com/stormmax/reinforcement_learning
 ### 7.02 Update
 
 Code for q_network and cartpole implementation. Problem : the system is apparently not learning.
+
+### 8.02 Update
+
+Problem solved. Need to assess it directly with gym tools.

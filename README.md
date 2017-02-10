@@ -24,3 +24,7 @@ Code for q_network and cartpole implementation. Problem : the system is apparent
 ### 8.02 Update
 
 Problem solved. Need to assess it directly with gym tools.
+
+### 10.02 Update
+
+Cartpole nearly solved : see https://gym.openai.com/evaluations/eval_jSsRe1G8RBmQSE24xmSqbA.

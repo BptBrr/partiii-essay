@@ -28,6 +28,9 @@ class Agent():
         self.state_input = tf.placeholder(tf.float32, [None, self.state_size])
         self.action = tf.placeholder(tf.int32, [None])
         self.target_q = tf.placeholder(tf.float32, [None])
+        self.q_predict = tf.placeholder(tf.float32, [None])
+
+        self.global_step = tf.Variable(0, trainable = False)
 
         self.w1 = tf.Variable(tf.random_normal([self.state_size, self.n_hidden_1]))
         self.w2 = tf.Variable(tf.random_normal([self.n_hidden_1, self.n_hidden_2]))
@@ -43,12 +46,13 @@ class Agent():
         layer_2 = tf.nn.relu(layer_2)
 
         self.q_values = tf.add(tf.matmul(layer_2, self.w3), self.b3)
-        action_mask = tf.one_hot(self.action, self.action_size)
-        q_predict = tf.reduce_sum(np.dot(self.q_values, action_mask), 1)
+        action_mask = tf.one_hot(self.action, self.action_size, 1.0, 0.0)
+        self.q_predict = tf.reduce_sum(self.q_values * action_mask, 1)
 
-        self.loss = tf.reduce_mean(tf.square(self.target_q - q_predict))
-        self.optimizer = tf.train.AdamOptimizer(self.rate)
-        self.train_op = self.optimizer.minimize(self.loss)
+        #learning_rate = tf.train.exponential_decay(self.rate, self.global_step, 10000, 0.95, staircase = True)
+        self.loss = tf.reduce_mean(tf.squared_difference(self.target_q, self.q_predict))
+        self.optimizer = tf.train.AdamOptimizer(self.rate) #learning_rate
+        self.train_op = self.optimizer.minimize(self.loss, global_step = self.global_step)
 
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
@@ -68,7 +72,7 @@ class Agent():
             self.buffer.append(step)
 
             if len(self.buffer) > self.buffer_size:
-                del self.buffer[:100]
+                del self.buffer[:1]
 
     def learn(self, episode, train_steps):
 
@@ -79,22 +83,20 @@ class Agent():
             # Create the minibatch containing training samples
             if len(self.buffer) > self.batch_size:
                 samples = random.sample(self.buffer, self.batch_size)
+            else:
+                samples = random.sample(self.buffer, len(self.buffer))
+            # Next state is stored in s[2]; we want to get the max for
+            # all next states in the minibatch.
+            q_values = self.sess.run(self.q_values, feed_dict={self.state_input: [s[2] for s in samples]})
+            max_q_values = q_values.max(axis = 1)
 
-                # Next state is stored in s[2]; we want to get the max for
-                # all next states in the minibatch.
-                q_values = self.sess.run(self.q_values, feed_dict={self.state_input: [s[2] for s in samples]})
-                max_q_values = q_values.max(axis = 1)
+            # We calculate the target, r + gamma * max Q(s,a) if not done, r else.
+            target_q = [(samples[i][3] + self.gamma * max_q_values[i] * (1 - samples[i][4])) for i in range(len(samples))]
 
-                # We calculate the target, r + gamma * max Q(s,a) if not done, r else.
-                target_q = [samples[i][3] + self.gamma * max_q_values[i] * (1 - samples[i][4]) for i in range(len(samples))]
-
-                l, a = self.sess.run([self.loss, self.train_op], feed_dict={
-                                                                # Initial states stored in s[0]
-                                                                self.state_input: [s[0] for s in samples],
-                                                                self.target_q: target_q,
-                                                                # Actions stored in s[1]
-                                                                self.action: [s[1] for s in samples]
-                                                                })
-
-                if self.steps % 100 == 0:
-                    print "Current loss :", l
+            self.sess.run(self.train_op, feed_dict={
+                                                # Initial states stored in s[0]
+                                                self.state_input: [s[0] for s in samples],
+                                                self.target_q: target_q,
+                                                # Actions stored in s[1]
+                                                self.action: [s[1] for s in samples]
+                                                })

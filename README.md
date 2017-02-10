@@ -13,5 +13,5 @@ https://github.com/stormmax/reinforcement_learning
 
 ### 10.02 - Update
 
-Cartpole solved : see https://gym.openai.com/evaluations/eval_jSsRe1G8RBmQSE24xmSqbA.
+Cartpole solved : see https://gym.openai.com/evaluations/eval_1ntk3fRDTVSQM3KQO3pdsA. (last in date)
 Should consider trying other parameters, to smooth the learning curve. When the result becomes acceptable, try to improve the learning speed for instance, or try to adapt the algorithm to another game.

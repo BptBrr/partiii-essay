@@ -7,10 +7,6 @@ Code for my Cambridge Part III Essay, about Deep Reinforcement Learning.
   - How to choose the number of features?
   - How to calculate the gradient?
 
-### Code examples 
-An implementation of DQN using OpenAI gym, tensorflow w/ multilayer perceptron :
-https://github.com/stormmax/reinforcement_learning
-
 ### 10.02 - Update
 
 Cartpole solved : see https://gym.openai.com/evaluations/eval_1ntk3fRDTVSQM3KQO3pdsA. (last in date)

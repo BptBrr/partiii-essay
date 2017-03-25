@@ -4,6 +4,8 @@ import tensorflow as tf
 import numpy as np
 import random
 import q_network as qn
+import tools
+import matplotlib.pyplot as plt
 
 # We want the agent to stop playing after the 200th step (end of the game).
 terminal = 200
@@ -11,8 +13,7 @@ terminal = 200
 # to the opposite of the score we want the agent to obtain.
 punition = -200
 
-# epochs : Number of times we run the minibatch GD.
-
+# epochs : Number of times we run the SGD.
 
 def train(agent, env, episodes, epochs):
     history = []
@@ -24,7 +25,6 @@ def train(agent, env, episodes, epochs):
                 #agent.decrease_epsilon(0.90, 0.005)
         cur_state = env.reset()
         t = 0
-        episode = []
         while t < terminal:
             #env.render()
             t += 1
@@ -33,18 +33,18 @@ def train(agent, env, episodes, epochs):
             if done and (t < terminal):
                 print "Episode finished after %d timesteps" % t
                 history.append(t)
-                episode.append([cur_state, action, next_state, -100, 1])
-                agent.learn(episode,epochs)
+                agent.append_memory([cur_state, action, next_state, -100, 1])
+                agent.learn(epochs)
                 break
             if done or (t == terminal):
                 print "Episode succeeded after %d timesteps" % t
                 history.append(t)
-                episode.append([cur_state, action, next_state, 1, 1])
-                agent.learn(episode,epochs)
+                agent.append_memory([cur_state, action, next_state, 1, 1])
+                agent.learn(epochs)
                 break
-            episode.append([cur_state, action, next_state, 0, done])
+            agent.append_memory([cur_state, action, next_state, 0, done])
             cur_state = next_state
-            agent.learn(episode,1)
+            agent.learn(epochs)
 
     return agent, history
 
@@ -60,7 +60,7 @@ def test(env, agent, init, episodes):
         # if the agent we trained before is able to solve it nonetheless.
         fail = False
         while t < init:
-            env.render()
+            #env.render()
             next_state, reward, fail, info = env.step(env.action_space.sample())
             t += 1
             if fail:
@@ -84,27 +84,20 @@ def test(env, agent, init, episodes):
     print "Number of failures:", failures
     print "The average testing reward, calculated over %d episodes, is %d \n" %(episodes - failures,(sum(history)/len(history)))
 
-#def preprocess(states):
-#    preprocessed_states = []
-#    for state in states:
-#        for s in state:
-#            preprocessed_states.append(s)
-#    return preprocessed_states
-
 
 env = gym.make('CartPole-v0')
-env = wrappers.Monitor(env, '/Users/baptiste/Programming/RLearning/Cartpole-GD2', force = True)
+#env = wrappers.Monitor(env, '/Users/baptiste/Programming/RLearning/Cartpole-GD3', force = True)
 
 # We take for minibatches size something corresponding roughly to 1% of the memory size
-agent = qn.Agent(0.05, 0.0006, 0.99, 64, 4, 2, 10000, 20, 20)
+agent = qn.Agent(0.05, 0.0001, 0.99, 128, 4, 2, 16384, 32, 16)
 agent.build_network()
-trained_agent, history = train(agent, env, 1000, 1)
-print history
+trained_agent, history = train(agent, env, 500, 1)
+tools.rmetric(10,history)
 
-env.close()
-gym.upload('/Users/baptiste/Programming/RLearning/Cartpole-GD2', api_key='sk_oH6439jxQ86N7cPzqpe5tA')
+#env.close()
+#gym.upload('/Users/baptiste/Programming/RLearning/Cartpole-GD3', api_key='sk_oH6439jxQ86N7cPzqpe5tA')
 
-#test(env, trained_agent, 10, 100)
+test(env, trained_agent, 10, 100)
 
 # GD : Testing reward 147
 # On 2000 episodes https://gym.openai.com/evaluations/eval_ey18z0ZxRDe2MSLNmyztzw

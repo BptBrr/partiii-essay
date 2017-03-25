@@ -51,7 +51,7 @@ class Agent():
 
         #learning_rate = tf.train.exponential_decay(self.rate, self.global_step, 10000, 0.95, staircase = True)
         self.loss = tf.reduce_mean(tf.squared_difference(self.target_q, self.q_predict))
-        self.optimizer = tf.train.AdamOptimizer(self.rate) #learning_rate
+        self.optimizer = tf.train.GradientDescentOptimizer(self.rate) #learning_rate
         self.train_op = self.optimizer.minimize(self.loss, global_step = self.global_step)
 
         self.sess = tf.Session()
@@ -74,6 +74,12 @@ class Agent():
             if len(self.buffer) > self.buffer_size:
                 del self.buffer[:1]
 
+    def decrease_epsilon(self, percent, thresold):
+        if self.epsilon > thresold:
+            self.epsilon = percent * self.epsilon
+        else:
+            self.epsilon = thresold
+
     def learn(self, episode, train_steps):
 
         self.append_memory(episode)
@@ -85,8 +91,7 @@ class Agent():
                 samples = random.sample(self.buffer, self.batch_size)
             else:
                 samples = random.sample(self.buffer, len(self.buffer))
-            # Next state is stored in s[2]; we want to get the max for
-            # all next states in the minibatch.
+            # Next state is stored in s[2]; we want to get the max for all next states in the minibatch.
             q_values = self.sess.run(self.q_values, feed_dict={self.state_input: [s[2] for s in samples]})
             max_q_values = q_values.max(axis = 1)
 

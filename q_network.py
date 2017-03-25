@@ -67,11 +67,10 @@ class Agent():
         else:
             return self.get_best_action(state)
 
-    def append_memory(self, episode):
-        for step in episode:
-            self.buffer.append(step)
+    def append_memory(self, step):
+        self.buffer.append(step)
 
-            if len(self.buffer) > self.buffer_size:
+        if len(self.buffer) > self.buffer_size:
                 del self.buffer[:1]
 
     def decrease_epsilon(self, percent, thresold):
@@ -80,22 +79,27 @@ class Agent():
         else:
             self.epsilon = thresold
 
-    def learn(self, episode, train_steps):
+    def learn(self, epochs):
 
-        self.append_memory(episode)
-        for i in range(train_steps):
+        for i in range(epochs):
             self.steps += 1
 
-            # Create the minibatch containing training samples
+            # Create the minibatches containing training samples
             if len(self.buffer) > self.batch_size:
-                samples = random.sample(self.buffer, self.batch_size)
+                #random.shuffle(self.buffer)
+                #minibatches = [self.buffer[k:k + self.batch_size] for k in xrange(0,len(self.buffer),self.batch_size)]
+                samples = random.sample(self.buffer,self.batch_size)
             else:
+                #random.shuffle(self.buffer)
+                #minibatches = [self.buffer]
                 samples = random.sample(self.buffer, len(self.buffer))
-            # Next state is stored in s[2]; we want to get the max for all next states in the minibatch.
+
+            #for samples in minibatches:
+                # Next state is stored in s[2]; we want to get the max for all next states in the minibatch.
             q_values = self.sess.run(self.q_values, feed_dict={self.state_input: [s[2] for s in samples]})
             max_q_values = q_values.max(axis = 1)
 
-            # We calculate the target, r + gamma * max Q(s,a) if not done, r else.
+                # We calculate the target, r + gamma * max Q(s,a) if not done, r else.
             target_q = [(samples[i][3] + self.gamma * max_q_values[i] * (1 - samples[i][4])) for i in range(len(samples))]
 
             self.sess.run(self.train_op, feed_dict={

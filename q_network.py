@@ -3,9 +3,9 @@ import tensorflow as tf
 import numpy as np
 import random
 
-# We build the Q approximator, using a 2 multilayer perceptron. Weights are
-# initialized at random following normal errors, to break symmetries and
-# avoid 0 gradient.
+# We build the Q approximator, using a 2 hidden layers multilayer perceptron.
+# Weights are initialized at random following normal errors, to break symmetries
+# and avoid 0 gradient.
 
 # We define here the Agent class, with functions allowing him to learn using the
 # Deep Q-Learning algorithm.

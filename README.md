@@ -1,5 +1,5 @@
 # partiii-essay
-This code uses TensorFlow and OpenAI Gym. The repo contains four files, all commented (except for mountaincar, which follows exactly the same ideas than cartpole).
+Repo associated to my Cambridge Part III Essay, "Deep Reinforcement Learning". This code uses TensorFlow and OpenAI Gym. The repo contains four files, all commented (except for mountaincar, which follows exactly the same ideas than cartpole).
 
 - **q_network.py** contains the implementation of the optimisation problem (see essay for more info). The Agent class and all its methods implements the deep q-learning algorithm. 
 - **cartpole.py** contains the solving of the cartpole environment, and a custom test function. 
